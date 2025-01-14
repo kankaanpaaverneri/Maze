@@ -52,6 +52,7 @@ pub mod grid {
         dig_initial_path(grid, &mut current_position);
         dig_correct_path(grid, &mut current_position, &dig_length);
         add_character_to_grid(grid, PLAYER, &current_position);
+        let player_original_position = current_position;
 
         let mut empty_count = 0;
         let mut iteration_count = 0;
@@ -63,8 +64,7 @@ pub mod grid {
         }
         println!("iteration_count = {}", iteration_count);
         add_character_to_grid(grid, WIN, &maze_hole);
-
-        return maze_hole;
+        return player_original_position;
     }
 
     fn count_characters_in_grid(

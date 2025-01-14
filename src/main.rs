@@ -6,7 +6,7 @@ fn main() {
     //let mut grid = generate_grid();
 
     let mut grid = grid::generate_grid_with_characters();
-    grid::dig_correct_path_to_maze(&mut grid);
+    let player_original_position = grid::dig_correct_path_to_maze(&mut grid);
 
     loop {
         std::process::Command::new("clear").status().unwrap();
@@ -15,12 +15,15 @@ fn main() {
 
         let command = read_user_input();
         if let Input::Exit = command {
+            std::process::Command::new("clear").status().unwrap();
+            grid::add_character_to_grid(&mut grid, 'S', &player_original_position);
             grid::print_full_grid(&grid);
             break;
         }
         let game_complete = grid::move_player(&mut grid, command);
         if game_complete {
             std::process::Command::new("clear").status().unwrap();
+            grid::add_character_to_grid(&mut grid, 'S', &player_original_position);
             grid::print_full_grid(&grid);
             println!("Game complete");
             break;

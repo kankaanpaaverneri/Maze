@@ -5,6 +5,7 @@ pub mod constants {
     pub const GRID_WIDTH: usize = 50;
     pub const GRID_HEIGHT: usize = 50;
     pub const WIN: char = 'W';
+    pub const MOVES: char = '.';
 
     #[derive(Debug, PartialEq)]
     pub enum Input {
@@ -65,6 +66,70 @@ pub mod grid {
         println!("iteration_count = {}", iteration_count);
         add_character_to_grid(grid, WIN, &maze_hole);
         return player_original_position;
+    }
+
+    pub fn find_player(grid: &[[char; GRID_WIDTH]; GRID_HEIGHT]) -> Option<Coordinates> {
+        for column in 0..GRID_HEIGHT {
+            for row in 0..GRID_WIDTH {
+                if grid[column][row] == PLAYER {
+                    return Some(Coordinates { column, row });
+                }
+            }
+            println!();
+        }
+        return None;
+    }
+
+    pub fn move_player(grid: &mut [[char; GRID_WIDTH]; GRID_HEIGHT], command: Input) -> bool {
+        update_grid(grid, command)
+    }
+    pub fn print_full_grid_with_move_history(
+        grid: &[[char; GRID_WIDTH]; GRID_HEIGHT],
+        list_of_moves: &Vec<Coordinates>,
+    ) {
+        for column in 0..GRID_HEIGHT {
+            for row in 0..GRID_WIDTH {
+                if is_movement_in_list(list_of_moves, &Coordinates { column, row }) {
+                    if grid[column][row] == EMPTY {
+                        print!("{} ", MOVES);
+                    } else {
+                        print!("{} ", grid[column][row]);
+                    }
+                } else {
+                    print!("{} ", grid[column][row]);
+                }
+            }
+            println!();
+        }
+    }
+
+    pub fn print_limited_view(grid: &[[char; GRID_WIDTH]; GRID_HEIGHT], view_distance: isize) {
+        if let Some(coordinates) = find_player(grid) {
+            let player_column = coordinates.column as isize;
+            let player_row = coordinates.row as isize;
+
+            for column in 0..GRID_HEIGHT as isize {
+                for row in 0..GRID_WIDTH as isize {
+                    let column_in_view_distance =
+                        in_view_distance(column, player_column, view_distance);
+                    let row_in_view_distance = in_view_distance(row, player_row, view_distance);
+
+                    if column_in_view_distance && row_in_view_distance {
+                        print!("{} ", grid[column as usize][row as usize]);
+                    }
+                }
+                println!();
+            }
+        }
+    }
+    fn is_movement_in_list(list_of_moves: &Vec<Coordinates>, current_move: &Coordinates) -> bool {
+        let Coordinates { column, row } = current_move;
+        for movement in list_of_moves {
+            if movement.column == *column && *row == movement.row {
+                return true;
+            }
+        }
+        return false;
     }
 
     fn count_characters_in_grid(
@@ -220,54 +285,9 @@ pub mod grid {
         return true;
     }
 
-    pub fn print_full_grid(grid: &[[char; GRID_WIDTH]; GRID_HEIGHT]) {
-        for column in 0..GRID_HEIGHT {
-            for row in 0..GRID_WIDTH {
-                print!("{} ", grid[column][row]);
-            }
-            println!();
-        }
-    }
-
-    pub fn print_limited_view(grid: &[[char; GRID_WIDTH]; GRID_HEIGHT], view_distance: isize) {
-        if let Some(coordinates) = find_player(grid) {
-            let player_column = coordinates.column as isize;
-            let player_row = coordinates.row as isize;
-
-            for column in 0..GRID_HEIGHT as isize {
-                for row in 0..GRID_WIDTH as isize {
-                    let column_in_view_distance =
-                        in_view_distance(column, player_column, view_distance);
-                    let row_in_view_distance = in_view_distance(row, player_row, view_distance);
-
-                    if column_in_view_distance && row_in_view_distance {
-                        print!("{} ", grid[column as usize][row as usize]);
-                    }
-                }
-                println!();
-            }
-        }
-    }
-
     fn in_view_distance(coordinate: isize, player_coordinate: isize, view_distance: isize) -> bool {
         coordinate >= player_coordinate - view_distance
             && coordinate <= player_coordinate + view_distance
-    }
-
-    fn find_player(grid: &[[char; GRID_WIDTH]; GRID_HEIGHT]) -> Option<Coordinates> {
-        for column in 0..GRID_HEIGHT {
-            for row in 0..GRID_WIDTH {
-                if grid[column][row] == PLAYER {
-                    return Some(Coordinates { column, row });
-                }
-            }
-            println!();
-        }
-        return None;
-    }
-
-    pub fn move_player(grid: &mut [[char; GRID_WIDTH]; GRID_HEIGHT], command: Input) -> bool {
-        update_grid(grid, command)
     }
 
     fn update_grid(grid: &mut [[char; GRID_WIDTH]; GRID_HEIGHT], direction: Input) -> bool {

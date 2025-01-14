@@ -7,26 +7,28 @@ fn main() {
 
     let mut grid = grid::generate_grid_with_characters();
     let player_original_position = grid::dig_correct_path_to_maze(&mut grid);
-
+    let mut list_of_moves: Vec<grid::Coordinates> = Vec::new();
     loop {
         std::process::Command::new("clear").status().unwrap();
-        //print_full_grid(&grid);
         grid::print_limited_view(&grid, 2);
 
         let command = read_user_input();
         if let Input::Exit = command {
             std::process::Command::new("clear").status().unwrap();
             grid::add_character_to_grid(&mut grid, 'S', &player_original_position);
-            grid::print_full_grid(&grid);
+            grid::print_full_grid_with_move_history(&grid, &list_of_moves);
             break;
         }
         let game_complete = grid::move_player(&mut grid, command);
         if game_complete {
             std::process::Command::new("clear").status().unwrap();
             grid::add_character_to_grid(&mut grid, 'S', &player_original_position);
-            grid::print_full_grid(&grid);
+            grid::print_full_grid_with_move_history(&grid, &list_of_moves);
             println!("Game complete");
             break;
+        }
+        if let Some(coordinates) = grid::find_player(&grid) {
+            list_of_moves.push(coordinates);
         }
     }
 }

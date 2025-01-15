@@ -2,10 +2,11 @@ pub mod constants {
     pub const EMPTY: char = ' ';
     pub const WALL: char = '#';
     pub const PLAYER: char = 'p';
-    pub const GRID_WIDTH: usize = 50;
-    pub const GRID_HEIGHT: usize = 50;
+    pub const GRID_WIDTH: usize = 40;
+    pub const GRID_HEIGHT: usize = 40;
     pub const WIN: char = 'W';
     pub const MOVES: char = '.';
+    pub const START: char = 'S';
 
     #[derive(Debug, PartialEq)]
     pub enum Input {
@@ -13,7 +14,6 @@ pub mod constants {
         Down,
         Left,
         Right,
-        Exit,
         Invalid,
     }
 }
@@ -39,7 +39,6 @@ pub mod grid {
         let Coordinates { column, row } = coordinates;
         grid[*column][*row] = character;
     }
-
     use rand::Rng;
     pub fn dig_correct_path_to_maze(grid: &mut [[char; GRID_WIDTH]; GRID_HEIGHT]) -> Coordinates {
         let dig_length = 500;
@@ -56,14 +55,11 @@ pub mod grid {
         let player_original_position = current_position;
 
         let mut empty_count = 0;
-        let mut iteration_count = 0;
         while empty_count < dig_length {
             let mut random_position = get_random_position();
             dig_correct_path(grid, &mut random_position, &dig_length);
             empty_count = count_characters_in_grid(EMPTY, grid);
-            iteration_count += 1;
         }
-        println!("iteration_count = {}", iteration_count);
         add_character_to_grid(grid, WIN, &maze_hole);
         return player_original_position;
     }
@@ -83,6 +79,7 @@ pub mod grid {
     pub fn move_player(grid: &mut [[char; GRID_WIDTH]; GRID_HEIGHT], command: Input) -> bool {
         update_grid(grid, command)
     }
+
     pub fn print_full_grid_with_move_history(
         grid: &[[char; GRID_WIDTH]; GRID_HEIGHT],
         list_of_moves: &Vec<Coordinates>,
@@ -99,7 +96,7 @@ pub mod grid {
                     print!("{} ", grid[column][row]);
                 }
             }
-            println!();
+            print!("\r\n");
         }
     }
 
@@ -113,12 +110,11 @@ pub mod grid {
                     let column_in_view_distance =
                         in_view_distance(column, player_column, view_distance);
                     let row_in_view_distance = in_view_distance(row, player_row, view_distance);
-
                     if column_in_view_distance && row_in_view_distance {
                         print!("{} ", grid[column as usize][row as usize]);
                     }
                 }
-                println!();
+                print!("\r\n");
             }
         }
     }
